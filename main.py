@@ -24,7 +24,7 @@ async def daily_task():
     # Check if it's Monday (0 means Monday)
     today = arrow.now().format('YYYY-MM-DD')
     week = arrow.now().shift(days=+7).format('YYYY-MM-DD')
-    if current_date.weekday() == 5:
+    if current_date.weekday() == 0 and current_date.hour == 8:
         await send_events(None, channel, today, week, "pour cette semaine")
     elif current_date.weekday() != 0 and current_date.hour == 8:
         await send_events(None, channel, today, today, 'pour aujourd\'hui')
