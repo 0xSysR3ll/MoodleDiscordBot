@@ -33,7 +33,7 @@ async def on_ready():
     print(f"Updating calendar...")
     download_calendar(calendar_url)
     print("Syncing commands...")
-    # await bot.sync_commands()
+    await bot.sync_commands()
     print("Done!")
     print(f"Starting daily task...")
     daily_task.start()
