@@ -83,7 +83,7 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
                     continue
                 description = f"Description: {event.description}\n" if event.description else ""
                 location = f"Lieu: {event.location}\n" if event.location else ""
-                events_str += f"\n**{event.name}**\nFrom {event.begin.format('HH:mm')} to {event.end.format('HH:mm')}\n{description}{location}"
+                events_str += f"\n**{event.name}**\De {event.begin.format('HH:mm')} à {event.end.format('HH:mm')}\n{description}{location}"
             embed.add_field(name=arrow.get(day, 'YYYY-MM-DD').format('dddd D MMMM YYYY', locale='fr').capitalize(), value=events_str, inline=True)
 
     if ctx is not None and isinstance(ctx, discord.Interaction):
