@@ -1,0 +1,12 @@
+services:
+  mdb:
+    container_name: mdb
+    image: mdb:latest
+    configs:
+      - source: mdb_config
+        target: /app/config/config.yml
+    restart: always
+
+configs:
+  mdb_config:
+    file: ./config/config.yml
