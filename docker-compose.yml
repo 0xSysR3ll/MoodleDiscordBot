@@ -2,6 +2,9 @@ services:
   mdb:
     container_name: mdb
     image: mdb:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     configs:
       - source: mdb_config
         target: /app/config/config.yml
