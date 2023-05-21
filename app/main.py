@@ -38,9 +38,13 @@ async def daily_task():
     for discord_channel in discord_channels:
         channel = bot.get_channel(discord_channel)
         if current_date.weekday() == 0 and current_date.hour == 8:
+            logger.info(f"Sending events for the week to {channel}!")
             await send_events(None, channel, today, week, "pour cette semaine")
         elif current_date.weekday() != 0 and current_date.hour == 8:
+            logger.info(f"Sending events for today to {channel}!")
             await send_events(None, channel, today, today, 'pour aujourd\'hui')
+        else:
+            logger.info(f"No events to send to {channel}!")
 
 # Define the bot's behavior when it's ready
 
@@ -60,6 +64,7 @@ async def on_ready():
         daily_task.start()
     except Exception as e:
         logger.error(f"Error starting daily task: {e}")
+    logger.info("Bot ready!")
 
 # Define a ping command that sends the bot's latency
 @bot.command(name='ping', description="Sends the bot's latency.")
