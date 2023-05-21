@@ -17,18 +17,20 @@ def download_calendar(url):
     
     # If the response status code is 200 (successful), write the response content to the calendar file
     if response.status_code == 200:
-        with open(filename, 'wb+') as file:
-            file.write(response.content)
-        print(f"Calendar downloaded and saved to {filename}")
-    else:
-        # If the response status code is not 200, print an error message
-        print("Failed to download the calendar")
+        try:
+            with open(filename, 'wb+') as file:
+                file.write(response.content)
+        except Exception as e:
+            print(f"Error writing calendar file: {e}")
 
 
 def parse_calendar(start_date, end_date):
     # Open the calendar file and read its contents into a Calendar object
-    with open(filename, 'r') as calendar_file:
-        calendar = Calendar(calendar_file.read())
+    try:
+        with open(filename, 'r') as calendar_file:
+            calendar = Calendar(calendar_file.read())
+    except Exception as e:
+        print(f"Error reading calendar file: {e}")
 
     # Convert the input start and end dates (in 'YYYY-MM-DD' format) to arrow date objects
     start_date = arrow.get(start_date, 'YYYY-MM-DD').date()

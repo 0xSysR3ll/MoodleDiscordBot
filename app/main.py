@@ -5,6 +5,10 @@ from modules.framagenda import *
 from ics import Calendar
 import arrow
 from collections import defaultdict
+from modules.logger_config import setup_logger
+
+# Set up the logger
+logger = setup_logger()
 
 # Load the configuration
 config = Config('config/config.yml')
@@ -17,10 +21,13 @@ discord_guild = config.get_config('discord', 'guild')
 calendar_url = config.get_config('calendar', 'url')
 
 # Initialize the bot
-bot = discord.Bot(guild_ids=[discord_guild])
+logger.info("Initializing bot...")
+try:
+    bot = discord.Bot(guild_ids=[discord_guild])
+except Exception as e:
+    logger.error(f"Error initializing bot: {e}")
 
 # Define a daily task that sends events for the week or for today
-
 
 @tasks.loop(hours=24)
 async def daily_task():
@@ -38,17 +45,24 @@ async def daily_task():
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}!")
-    print(f"Connected to {len(bot.guilds)} guilds!")
-    download_calendar(calendar_url)
+    logger.info(f"Logged in as {bot.user}!")
+    logger.info("Downloading calendar...")
+    try:
+        download_calendar(calendar_url)
+    except Exception as e:
+        logger.error(f"Error downloading calendar: {e}")
+    logger.info("Syncing commands...")
     await bot.sync_commands(force=True)
-    daily_task.start()
+    logger.info("Starting daily task...")
+    try:
+        daily_task.start()
+    except Exception as e:
+        logger.error(f"Error starting daily task: {e}")
 
 # Define a ping command that sends the bot's latency
-
-
 @bot.command(name='ping', description="Sends the bot's latency.")
 async def ping_command(ctx):
+    logger.info(f"Received command 'ping' from {ctx.author} in {ctx.channel}!")
     latency = round(bot.latency * 1000)
     await ctx.respond(f"Pong! ({latency}ms)")
 
@@ -65,12 +79,15 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
     # Check for presence of "DISTANCIEL" and "PRESENTIEL" in event names and store them in event_mode
     event_mode = []
     if "DISTANCIEL" in event_name_words:
+        logger.debug("DISTANCIEL found in event names!")
         event_mode.append("DISTANCIEL")
     if "PRESENTIEL" in event_name_words:
+        logger.debug("PRESENTIEL found in event names!")
         event_mode.append("PRESENTIEL")
 
     # If there are no events, create an embed message saying no courses are planned
     if len(events) == 0:
+        logger.debug("No events found!")
         embed_title = f"📅 Agenda {time_range}"
         embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
         embed = discord.Embed(
@@ -101,15 +118,24 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
 
     # If this is a Discord interaction, respond to the interaction with the embed message
     if ctx is not None and isinstance(ctx, discord.Interaction):
-        await ctx.send(embed=embed)
+        logger.info(f"Sending response to {ctx.author} in {ctx.channel.name}!")
+        try:
+            await ctx.send(embed=embed)
+        except Exception as e:
+            logger.error(f"Error sending response: {e}")
     else:
+        logger.info(f"Sending message to {channel}!")
         # Otherwise, send the embed message to the provided channel
-        await channel.send(embed=embed)
+        try:
+            await channel.send(embed=embed)
+        except Exception as e:
+            logger.error(f"Error sending message: {e}")
 
 
 # This function is a command that sends today's events to the Discord channel
 @bot.command(name='today', description="Sends today's events.")
 async def today_command(ctx):
+    logger.info(f"Received command 'today' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
@@ -120,15 +146,22 @@ async def today_command(ctx):
     time_range = "pour aujourd'hui"
 
     # Send a response to indicate processing is underway
-    await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    try:
+        await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    except Exception as e:
+        logger.error(f"Error sending response: {e}")
 
     # Call the send_events function to fetch and send the events for today
-    await send_events(ctx, ctx.channel, today, today, time_range)
+    try:
+        await send_events(ctx, ctx.channel, today, today, time_range)
+    except Exception as e:
+        logger.error(f"Error sending events: {e}")
 
 
 # This function is a command that sends tomorrow's events to the Discord channel
 @bot.command(name='tomorrow', description="Sends tomorrow's events.")
 async def tomorrow_command(ctx):
+    logger.info(f"Received command 'tomorrow' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
@@ -139,15 +172,22 @@ async def tomorrow_command(ctx):
     time_range = "pour demain"
 
     # Send a response to indicate processing is underway
-    await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    try:
+        await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    except Exception as e:
+        logger.error(f"Error sending response: {e}")
 
     # Call the send_events function to fetch and send the events for tomorrow
-    await send_events(ctx, ctx.channel, tomorrow, tomorrow, time_range)
+    try:
+        await send_events(ctx, ctx.channel, tomorrow, tomorrow, time_range)
+    except Exception as e:
+        logger.error(f"Error sending events: {e}")
 
 
 # This function is a command that sends the events for the next 3 days to the Discord channel
 @bot.command(name='3days', description="Sends the events for the next 3 days.")
 async def threedays_command(ctx):
+    logger.info(f"Received command '3days' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
@@ -161,15 +201,22 @@ async def threedays_command(ctx):
     time_range = "pour les 3 prochains jours"
 
     # Send a response to indicate processing is underway
-    await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    try:
+        await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    except Exception as e:
+        logger.error(f"Error sending response: {e}")
 
     # Call the send_events function to fetch and send the events for the next three days
-    await send_events(ctx, ctx.channel, today, threedays, time_range)
+    try:
+        await send_events(ctx, ctx.channel, today, threedays, time_range)
+    except Exception as e:
+        logger.error(f"Error sending events: {e}")
 
 
 # This function is a command that sends the events for the current week to the Discord channel
 @bot.command(name='week', description="Sends this week's events.")
 async def week_command(ctx):
+    logger.info(f"Received command 'week' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
@@ -183,10 +230,16 @@ async def week_command(ctx):
     time_range = "pour cette semaine"
 
     # Send a response to indicate processing is underway
-    await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    try:
+        await ctx.respond('Traitement de la demande en cours... :hourglass_flowing_sand:')
+    except Exception as e:
+        logger.error(f"Error sending response: {e}")
 
     # Call the send_events function to fetch and send the events for the current week
     await send_events(ctx, ctx.channel, today, week, time_range)
 
-
-bot.run(discord_token)
+logger.info("Starting bot...")
+try:
+    bot.run(discord_token)
+except Exception as e:
+    logger.error(f"Error starting bot: {e}")
