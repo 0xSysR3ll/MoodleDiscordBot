@@ -5,7 +5,10 @@ FROM python:3.8-slim-buster
 WORKDIR /app
 
 # Add the current directory contents into the container at /app
-ADD . /app
+ADD app/ .
+
+# Add config directory
+RUN mkdir config
 
 # Set the timezone
 RUN ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime && echo Europe/Paris > /etc/timezone
