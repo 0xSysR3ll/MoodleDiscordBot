@@ -9,6 +9,7 @@ locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')  # set the locale
 
 filename = os.path.join(os.path.dirname(__file__), '../files/calendar.ics')
 
+
 def download_calendar(url):
     # Make sure the directory exists
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -31,7 +32,8 @@ def parse_calendar(start_date, end_date):
     end_date = arrow.get(end_date, 'YYYY-MM-DD').date()
 
     # Filter events based on start and end date
-    events = [event for event in calendar.events if start_date <= event.begin.date() <= end_date]
+    events = [event for event in calendar.events if start_date <=
+              event.begin.date() <= end_date]
 
     # Return the filtered events
     return events
