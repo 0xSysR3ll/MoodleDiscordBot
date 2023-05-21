@@ -1,7 +1,11 @@
 discord:
   token: # token
-  channel: # channel id
-  guild: # guild id
+  channels: 
+    - # channel id 1
+    - # channel id 2
+  guilds: 
+    - # guild id 1
+    - # guild id 2
 
 calendar:
   url: # url to the calendar

@@ -16,14 +16,14 @@ config.load()
 
 # Get discord and calendar details from the config
 discord_token = config.get_config('discord', 'token')
-discord_channel = config.get_config('discord', 'channel')
-discord_guild = config.get_config('discord', 'guild')
+discord_channels = config.get_config('discord', 'channels')
+discord_guilds = config.get_config('discord', 'guilds')
 calendar_url = config.get_config('calendar', 'url')
 
 # Initialize the bot
 logger.info("Initializing bot...")
 try:
-    bot = discord.Bot(guild_ids=[discord_guild])
+    bot = discord.Bot(guild_ids=discord_guilds)
 except Exception as e:
     logger.error(f"Error initializing bot: {e}")
 
@@ -32,13 +32,15 @@ except Exception as e:
 @tasks.loop(hours=24)
 async def daily_task():
     current_date = arrow.now()
-    channel = bot.get_channel(discord_channel)
     today = arrow.now().format('YYYY-MM-DD')
     week = arrow.now().shift(days=+7).format('YYYY-MM-DD')
-    if current_date.weekday() == 0 and current_date.hour == 8:
-        await send_events(None, channel, today, week, "pour cette semaine")
-    elif current_date.weekday() != 0 and current_date.hour == 8:
-        await send_events(None, channel, today, today, 'pour aujourd\'hui')
+
+    for discord_channel in discord_channels:
+        channel = bot.get_channel(discord_channel)
+        if current_date.weekday() == 0 and current_date.hour == 8:
+            await send_events(None, channel, today, week, "pour cette semaine")
+        elif current_date.weekday() != 0 and current_date.hour == 8:
+            await send_events(None, channel, today, today, 'pour aujourd\'hui')
 
 # Define the bot's behavior when it's ready
 
