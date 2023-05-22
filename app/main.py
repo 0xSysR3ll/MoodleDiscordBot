@@ -14,7 +14,7 @@ logger = setup_logger()
 config = Config('config/config.yml')
 config.load()
 
-# Get discord and calendar details from the config
+# Get discord, and calendar details from the config
 discord_token = config.get_config('discord', 'token')
 discord_channels = config.get_config('discord', 'channels')
 discord_guilds = config.get_config('discord', 'guilds')
@@ -33,7 +33,7 @@ except Exception as e:
 async def daily_task():
     current_date = arrow.now()
     today = arrow.now().format('YYYY-MM-DD')
-    week = arrow.now().shift(days=+7).format('YYYY-MM-DD')
+    week = arrow.now().shift(days=+6).format('YYYY-MM-DD')
 
     for discord_channel in discord_channels:
         channel = bot.get_channel(discord_channel)
@@ -64,7 +64,6 @@ async def on_ready():
         daily_task.start()
     except Exception as e:
         logger.error(f"Error starting daily task: {e}")
-    logger.info("Bot ready!")
 
 # Define a ping command that sends the bot's latency
 @bot.command(name='ping', description="Sends the bot's latency.")
@@ -95,10 +94,11 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
     # If there are no events, create an embed message saying no courses are planned
     if len(events) == 0:
         logger.debug("No events found!")
-        embed_title = f"📅 Agenda {time_range}"
-        embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
-        embed = discord.Embed(
-            title=embed_title, description=embed_description, color=discord.Color.blue())
+        if ctx is not None and isinstance(ctx, discord.Interaction):
+            embed_title = f"📅 Agenda {time_range}"
+            embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
+            embed = discord.Embed(
+                title=embed_title, description=embed_description, color=discord.Color.blue())
     else:
         # If there are events, group them by day
         events_by_day = defaultdict(list)
@@ -229,9 +229,28 @@ async def week_command(ctx):
 
     # Get the current date in YYYY-MM-DD format
     today = arrow.now().format('YYYY-MM-DD')
-
-    # Get the date for one week from now in YYYY-MM-DD format
-    week = arrow.now().shift(days=+7).format('YYYY-MM-DD')
+    match arrow.now().weekday():
+        case 0:
+            # If today is Monday, count 6 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+6).format('YYYY-MM-DD')
+        case 1:
+            # If today is Tuesday, count 5 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+5).format('YYYY-MM-DD')
+        case 2:
+            # If today is Wednesday, count 4 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+4).format('YYYY-MM-DD')
+        case 3:
+            # If today is Thursday, count 3 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+3).format('YYYY-MM-DD')
+        case 4:
+            # If today is Friday, count 2 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+2).format('YYYY-MM-DD')
+        case 5:
+            # If today is Saturday, count 1 day ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+1).format('YYYY-MM-DD')
+        case 6:
+            # If today is Sunday, count 7 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+7).format('YYYY-MM-DD')
 
     # Set the time range string for the current week
     time_range = "pour cette semaine"

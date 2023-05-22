@@ -1,10 +1,11 @@
-# logger_config.py
 import logging
 from colorlog import ColoredFormatter
 
-def setup_logger():
+def setup_logger(logger_name=None):
+    logger_name = logger_name or __name__
+    
     # Create a logger
-    logger = logging.getLogger()
+    logger = logging.getLogger(logger_name)
 
     # Set the log level to DEBUG to capture all the logs
     logger.setLevel(logging.INFO)

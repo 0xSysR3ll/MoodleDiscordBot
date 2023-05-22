@@ -4,3 +4,5 @@ pyyaml
 ics
 arrow
 colorlog
+bs4
+selenium
