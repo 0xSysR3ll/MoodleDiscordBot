@@ -29,6 +29,7 @@ except Exception as e:
 
 # Define a daily task that sends events for the week or for today
 
+
 @tasks.loop(hours=24)
 async def daily_task():
     current_date = arrow.now()
@@ -66,6 +67,8 @@ async def on_ready():
         logger.error(f"Error starting daily task: {e}")
 
 # Define a ping command that sends the bot's latency
+
+
 @bot.command(name='ping', description="Sends the bot's latency.")
 async def ping_command(ctx):
     logger.info(f"Received command 'ping' from {ctx.author} in {ctx.channel}!")
@@ -81,24 +84,23 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
     # Create a set of all unique words in event names for checking presence of certain words later
     event_name_words = set(
         word for event in events for word in event.name.split())
-
     # Check for presence of "DISTANCIEL" and "PRESENTIEL" in event names and store them in event_mode
     event_mode = []
     if "DISTANCIEL" in event_name_words:
-        logger.debug("DISTANCIEL found in event names!")
+        logger.info("DISTANCIEL found in event names!")
         event_mode.append("DISTANCIEL")
     if "PRESENTIEL" in event_name_words:
-        logger.debug("PRESENTIEL found in event names!")
+        logger.info("PRESENTIEL found in event names!")
         event_mode.append("PRESENTIEL")
 
     # If there are no events, create an embed message saying no courses are planned
     if len(events) == 0:
-        logger.debug("No events found!")
-        if ctx is not None and isinstance(ctx, discord.Interaction):
-            embed_title = f"📅 Agenda {time_range}"
-            embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
-            embed = discord.Embed(
-                title=embed_title, description=embed_description, color=discord.Color.blue())
+        logger.info("No events found!")
+        embed_title = f"📅 Agenda {time_range}"
+        embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
+        embed = discord.Embed(
+            title=embed_title, description=embed_description, color=discord.Color.blue())
+
     else:
         # If there are events, group them by day
         events_by_day = defaultdict(list)
@@ -110,14 +112,13 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
         if event_mode:
             embed_title += f" ({', '.join(event_mode)})"
         embed = discord.Embed(title=embed_title, color=discord.Color.orange())
-
         # For each day, add a field to the embed message with the events for that day
         for day, events in sorted(events_by_day.items(), key=lambda item: arrow.get(item[0], 'YYYY-MM-DD')):
             events_str = ""
             for event in sorted(events, key=lambda e: e.begin):
                 if "DISTANCIEL" in event.name or "PRESENTIEL" in event.name:
                     continue
-                description = f"Description: {event.description}\n" if event.description else ""
+                description = f"Description: {event.description}\n" if event.description or len(str(event.description)) > 2 else ""
                 location = f"Lieu: {event.location}\n" if event.location else ""
                 events_str += f"\n**{event.name}**\nDe {event.begin.format('HH:mm')} à {event.end.format('HH:mm')}\n{description}{location}"
             embed.add_field(name=arrow.get(day, 'YYYY-MM-DD').format('dddd D MMMM YYYY',
@@ -142,7 +143,8 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
 # This function is a command that sends today's events to the Discord channel
 @bot.command(name='today', description="Sends today's events.")
 async def today_command(ctx):
-    logger.info(f"Received command 'today' from {ctx.author} in {ctx.channel}!")
+    logger.info(
+        f"Received command 'today' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
@@ -168,7 +170,8 @@ async def today_command(ctx):
 # This function is a command that sends tomorrow's events to the Discord channel
 @bot.command(name='tomorrow', description="Sends tomorrow's events.")
 async def tomorrow_command(ctx):
-    logger.info(f"Received command 'tomorrow' from {ctx.author} in {ctx.channel}!")
+    logger.info(
+        f"Received command 'tomorrow' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
@@ -194,7 +197,8 @@ async def tomorrow_command(ctx):
 # This function is a command that sends the events for the next 3 days to the Discord channel
 @bot.command(name='3days', description="Sends the events for the next 3 days.")
 async def threedays_command(ctx):
-    logger.info(f"Received command '3days' from {ctx.author} in {ctx.channel}!")
+    logger.info(
+        f"Received command '3days' from {ctx.author} in {ctx.channel}!")
     # Defer the interaction to ensure the command doesn't time out
     await ctx.defer(ephemeral=True)
 
