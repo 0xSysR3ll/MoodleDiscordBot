@@ -40,16 +40,14 @@ async def daily_task():
         channel = bot.get_channel(discord_channel)
         if current_date.weekday() == 0 and current_date.hour == 8:
             logger.info(f"Sending events for the week to {channel}!")
-            await send_events(None, channel, today, week, "pour cette semaine")
+            await send_events(ctx=None, channel=channel, start_date=today, end_date=week, time_range="pour cette semaine")
         elif current_date.weekday() != 0 and current_date.hour == 8:
             logger.info(f"Sending events for today to {channel}!")
-            await send_events(None, channel, today, today, 'pour aujourd\'hui')
+            await send_events(ctx=None, channel=channel, start_date=today, end_date=today, time_range='pour aujourd\'hui')
         else:
             logger.info(f"No events to send to {channel}!")
 
 # Define the bot's behavior when it's ready
-
-
 @bot.event
 async def on_ready():
     logger.info(f"Logged in as {bot.user}!")
@@ -77,7 +75,7 @@ async def ping_command(ctx):
 
 
 # This function is used to send a list of events to a Discord channel
-async def send_events(ctx, channel, start_date, end_date, time_range):
+async def send_events(ctx: discord.context, channel: discord.channel, start_date: str, end_date: str, time_range: str):
     # Parse the calendar events between the start and end dates
     events = parse_calendar(start_date, end_date)
 
@@ -95,12 +93,13 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
 
     # If there are no events, create an embed message saying no courses are planned
     if len(events) == 0:
-        logger.info("No events found!")
-        embed_title = f"📅 Agenda {time_range}"
-        embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
-        embed = discord.Embed(
-            title=embed_title, description=embed_description, color=discord.Color.blue())
-
+        logger.info("No events found! Not sending message.")
+        if ctx is None:
+            embed = None
+        else:
+            embed_title = f"📅 Agenda {time_range}"
+            embed_description = f"Bonjour ! Il n'y a pas de cours prévu {time_range} !"
+            embed = discord.Embed(title=embed_title, description=embed_description, color=discord.Color.blue())
     else:
         # If there are events, group them by day
         events_by_day = defaultdict(list)
@@ -124,8 +123,10 @@ async def send_events(ctx, channel, start_date, end_date, time_range):
             embed.add_field(name=arrow.get(day, 'YYYY-MM-DD').format('dddd D MMMM YYYY',
                             locale='fr').capitalize(), value=events_str, inline=True)
 
+    if embed is None:
+        pass
     # If this is a Discord interaction, respond to the interaction with the embed message
-    if ctx is not None and isinstance(ctx, discord.Interaction):
+    elif ctx is not None and isinstance(ctx, discord.Interaction):
         logger.info(f"Sending response to {ctx.author} in {ctx.channel.name}!")
         try:
             await ctx.send(embed=embed)
