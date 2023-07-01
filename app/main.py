@@ -117,7 +117,7 @@ async def send_events(ctx: discord.context, channel: discord.channel, start_date
             for event in sorted(events, key=lambda e: e.begin):
                 if "DISTANCIEL" in event.name or "PRESENTIEL" in event.name:
                     continue
-                description = f"Description: {event.description}\n" if event.description or len(str(event.description)) > 2 else ""
+                description = f"Description: {event.description}\n" if (event.description and len(event.description) > 2 ) else ""
                 location = f"Lieu: {event.location}\n" if event.location else ""
                 events_str += f"\n**{event.name}**\nDe {event.begin.format('HH:mm')} à {event.end.format('HH:mm')}\n{description}{location}"
             embed.add_field(name=arrow.get(day, 'YYYY-MM-DD').format('dddd D MMMM YYYY',
@@ -251,8 +251,8 @@ async def week_command(ctx):
             # If today is Friday, count 2 days ahead to get the date for one week from now in YYYY-MM-DD format
             week = arrow.now().shift(days=+2).format('YYYY-MM-DD')
         case 5:
-            # If today is Saturday, count 1 day ahead to get the date for one week from now in YYYY-MM-DD format
-            week = arrow.now().shift(days=+1).format('YYYY-MM-DD')
+            # If today is Saturday, count 8 days ahead to get the date for one week from now in YYYY-MM-DD format
+            week = arrow.now().shift(days=+8).format('YYYY-MM-DD')
         case 6:
             # If today is Sunday, count 7 days ahead to get the date for one week from now in YYYY-MM-DD format
             week = arrow.now().shift(days=+7).format('YYYY-MM-DD')
