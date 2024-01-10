@@ -38,10 +38,10 @@ async def daily_task():
 
     for discord_channel in discord_channels:
         channel = bot.get_channel(discord_channel)
-        if current_date.weekday() == 0 and current_date.hour == 8:
+        if current_date.weekday() == 0 and current_date.hour == 7:
             logger.info(f"Sending events for the week to {channel}!")
             await send_events(ctx=None, channel=channel, start_date=today, end_date=week, time_range="pour cette semaine")
-        elif current_date.weekday() != 0 and current_date.hour == 8:
+        elif current_date.weekday() != 0 and current_date.hour == 7:
             logger.info(f"Sending events for today to {channel}!")
             await send_events(ctx=None, channel=channel, start_date=today, end_date=today, time_range='pour aujourd\'hui')
         else:
